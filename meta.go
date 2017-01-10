@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func UpdateMetafile(source_meta string, dest_meta string, updated []string) error {
+func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 
 	lookup := make(map[int64][]byte)
 
@@ -44,7 +44,7 @@ func UpdateMetafile(source_meta string, dest_meta string, updated []string) erro
 
 	var writer *csv.DictWriter
 
-	reader, reader_err := csv.NewDictReaderFromPath(source_meta)
+	reader, reader_err := csv.NewDictReader(source)
 
 	if reader_err != nil {
 		return reader_err
@@ -89,7 +89,7 @@ func UpdateMetafile(source_meta string, dest_meta string, updated []string) erro
 				fieldnames = append(fieldnames, k)
 			}
 
-			writer, err = csv.NewDictWriterFromPath(dest_meta, fieldnames)
+			writer, err = csv.NewDictWriter(dest, fieldnames)
 
 			if err != nil {
 				return err

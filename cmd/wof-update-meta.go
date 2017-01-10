@@ -2,12 +2,20 @@ package main
 
 import (
        "github.com/whosonfirst/go-whosonfirst-meta"
+       "log"
+       "os"
 )
 
 func main() {
 
-     src := "/usr/local/mapzen/whosonfirst-data/meta/wof-microhood-latest.csv"
-     dest := "foo.csv"
+     latest := "/usr/local/mapzen/whosonfirst-data/meta/wof-microhood-latest.csv"
+     src, err := os.Open(latest)
+
+     if err != nil {
+     	log.Fatal(err)
+     }
+     
+     dest := os.Stdout
      
      updated := make([]string, 0)
 
