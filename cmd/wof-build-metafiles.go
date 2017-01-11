@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	_ "github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-crawl"
 	"github.com/whosonfirst/go-whosonfirst-meta"
@@ -20,6 +21,7 @@ func main() {
 
 	procs := flag.Int("processes", runtime.NumCPU()*2, "The number of concurrent processes to use")
 	repo := flag.String("repo", "", "...")
+	limit := flag.Int("open-filehandles", 512, "...")
 
 	flag.Parse()
 
@@ -65,26 +67,18 @@ func main() {
 		log.Fatal("Not a directory")
 	}
 
-	/*
+	throttle := make(chan bool, *limit)
 
-		please to add a throttle because this:
-
-		./bin/wof-build-metafiles -repo /usr/local/data/whosonfirst-data
-		error: open /usr/local/data/whosonfirst-data/data/101/727/013: too many open files
-		2017/01/11 00:16:58 time to dump 115213 features: 15.185776169s
-
-	*/
-
-	limit := 100
-	throttle := make(chan bool, limit)
-
-	for i := 0; i < limit; i++ {
+	for i := 0; i < *limit; i++ {
 
 		throttle <- true
 	}
 
 	var count int32
 	count = 0
+
+	var open int32
+	open = 0
 
 	callback := func(path string, info os.FileInfo) error {
 
@@ -111,8 +105,14 @@ func main() {
 		fh, err := os.Open(path)
 
 		if err != nil {
-			log.Fatal(err)
+			msg := fmt.Sprintf("Failed to open %s because %s (%d open filehandles)", path, err, atomic.LoadInt32(&open))
+			log.Fatal(msg)
 		}
+
+		defer fh.Close()
+
+		atomic.AddInt32(&open, 1)
+		defer atomic.AddInt32(&open, -1)
 
 		feature, err := ioutil.ReadAll(fh)
 
