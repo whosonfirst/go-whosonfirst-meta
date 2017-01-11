@@ -18,7 +18,9 @@ build:	fmt bin
 deps:   rmdeps
 	@GOPATH=$(GOPATH) go get -u "github.com/facebookgo/atomicfile"
 	@GOPATH=$(GOPATH) go get -u "github.com/tidwall/gjson"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-crawl"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-csv"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-uri"
 
 vendor-deps: deps
 	if test ! -d vendor; then mkdir vendor; fi
@@ -27,7 +29,9 @@ vendor-deps: deps
 	find vendor -name '.git' -print -type d -exec rm -rf {} +
 
 bin: 	self
-	@GOPATH=$(GOPATH) go build -o bin/wof-update-meta cmd/wof-update-meta.go
+	@GOPATH=$(GOPATH) go build -o bin/wof-build-metafiles cmd/wof-build-metafiles.go
+	@GOPATH=$(GOPATH) go build -o bin/wof-update-metafile cmd/wof-update-metafile.go
 
 fmt:
 	go fmt meta.go
+	go fmt cmd/*.go
