@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	_ "github.com/facebookgo/atomicfile"
+	"github.com/facebookgo/atomicfile"
+	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-whosonfirst-crawl"
+	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-meta"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	_ "io"
@@ -13,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -67,6 +70,8 @@ func main() {
 		log.Fatal("Not a directory")
 	}
 
+	mu := new(sync.Mutex)
+
 	throttle := make(chan bool, *limit)
 
 	for i := 0; i < *limit; i++ {
@@ -79,6 +84,16 @@ func main() {
 
 	var open int32
 	open = 0
+
+	filehandles := make(map[string]*atomicfile.File)
+	writers := make(map[string]*csv.DictWriter)
+
+	defer func() {
+
+		for _, fh := range filehandles {
+			fh.Close()
+		}
+	}()
 
 	callback := func(path string, info os.FileInfo) error {
 
@@ -120,9 +135,44 @@ func main() {
 			log.Fatal(err)
 		}
 
-		meta.DumpFeature(feature)
-		atomic.AddInt32(&count, 1)
+		row, err := meta.DumpFeature(feature)
 
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		placetype := gjson.GetBytes(feature, "properties.wof:placetype").String()
+
+		mu.Lock()
+
+		writer, ok := writers[placetype]
+
+		if !ok {
+
+			fieldnames := make([]string, 0)
+
+			for k, _ := range row {
+				fieldnames = append(fieldnames, k)
+			}
+
+			outfile := fmt.Sprintf("/tmp/wof-%s-latest.csv", placetype)
+			fh, err := atomicfile.New(outfile, os.FileMode(0644))
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			writer, err = csv.NewDictWriter(fh, fieldnames)
+
+			filehandles[placetype] = fh
+			writers[placetype] = writer
+		}
+
+		mu.Unlock()
+
+		writer.WriteRow(row)
+
+		atomic.AddInt32(&count, 1)
 		return nil
 	}
 
