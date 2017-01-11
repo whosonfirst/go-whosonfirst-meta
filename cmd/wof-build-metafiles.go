@@ -75,10 +75,24 @@ func main() {
 
 	*/
 
+	limit := 100
+	throttle := make(chan bool, limit)
+
+	for i := 0; i < limit; i++ {
+
+		throttle <- true
+	}
+
 	var count int32
 	count = 0
 
 	callback := func(path string, info os.FileInfo) error {
+
+		<-throttle
+
+		defer func() {
+			throttle <- true
+		}()
 
 		if info.IsDir() {
 			return nil
