@@ -8,6 +8,7 @@ self:   prep rmdeps
 	if test ! -d src; then mkdir src; fi
 	if test ! -d src/github.com/whosonfirst/go-whosonfirst-meta; then mkdir -p src/github.com/whosonfirst/go-whosonfirst-meta/; fi
 	cp  meta.go src/github.com/whosonfirst/go-whosonfirst-meta/
+	cp -r meta src/github.com/whosonfirst/go-whosonfirst-meta/
 	cp -r vendor/src/* src/
 
 rmdeps:

@@ -1,17 +1,79 @@
 package meta
 
 import (
+       	"encoding/json"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-whosonfirst-csv"
+	"github.com/whosonfirst/go-whosonfirst-meta/meta"
 	"io"
 	"io/ioutil"
-	_ "log"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
 
+type WOFMetaDefaults map[string]string
+
+func (d WOFMetaDefaults) EnsureDefaults(row map[string]string) map[string]string {
+
+     out := make(map[string]string)
+
+     for k, v := range row {
+     
+     	if v != "" {
+	     out[k] = v
+	     continue
+	}
+
+	vv, ok := d[k]
+
+	if !ok {
+	     out[k] = v
+	     continue
+	}
+
+	out[k] = vv
+     }
+
+     for k, v := range d {
+
+     	 _, ok := out[k]
+
+	 if ! ok {
+	    out[k] = v
+	 }
+     }
+
+     return out
+}
+
+var defaults *WOFMetaDefaults
+
+func init() {
+
+	var err error
+
+	defaults, err = Spec()
+
+	if err != nil {
+		log.Fatal("Failed to parse defaults", err)
+	}
+}
+
+func Spec() (*WOFMetaDefaults, error) {
+
+	var defaults WOFMetaDefaults
+	err := json.Unmarshal([]byte(meta.Defaults), &defaults)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &defaults, nil
+}
+     
 func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 
 	lookup := make(map[int64][]byte)
@@ -78,7 +140,7 @@ func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 				return err
 			}
 
-			row = new_row
+			row = defaults.EnsureDefaults(new_row)
 		}
 
 		if writer == nil {
