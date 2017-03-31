@@ -1757,12 +1757,14 @@ next_key:
 					}
 					if i < len(paths[j]) {
 						if paths[j][i] == '.' {
-							// matched, but there still more keys in the path
+							// matched, but there are still more keys in path
 							goto match_not_atend
 						}
 					}
-					// matched and at the end of the path
-					goto match_atend
+					if len(paths[j]) <= len(key) || kplen != 0 {
+						// matched and at the end of the path
+						goto match_atend
+					}
 				}
 				// no match, jump to the nomatch label
 				goto nomatch

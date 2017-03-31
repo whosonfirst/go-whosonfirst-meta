@@ -1,7 +1,7 @@
 package meta
 
 import (
-       	"encoding/json"
+	"encoding/json"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-meta/meta"
@@ -14,39 +14,39 @@ import (
 	"strings"
 )
 
-type WOFMetaDefaults map[string]string
+type WOFMetaDefaults map[string]interface{}
 
 func (d WOFMetaDefaults) EnsureDefaults(row map[string]string) map[string]string {
 
-     out := make(map[string]string)
+	out := make(map[string]string)
 
-     for k, v := range row {
-     
-     	if v != "" {
-	     out[k] = v
-	     continue
+	for k, v := range row {
+
+		if v != "" {
+			out[k] = v
+			continue
+		}
+
+		_, ok := d[k]
+
+		if !ok {
+			out[k] = v
+			continue
+		}
+
+		out[k] = "FIX ME"
 	}
 
-	vv, ok := d[k]
+	for k, _ := range d {
 
-	if !ok {
-	     out[k] = v
-	     continue
+		_, ok := out[k]
+
+		if !ok {
+			out[k] = "FIX ME 2"
+		}
 	}
 
-	out[k] = vv
-     }
-
-     for k, v := range d {
-
-     	 _, ok := out[k]
-
-	 if ! ok {
-	    out[k] = v
-	 }
-     }
-
-     return out
+	return out
 }
 
 var defaults *WOFMetaDefaults
@@ -73,7 +73,7 @@ func Spec() (*WOFMetaDefaults, error) {
 
 	return &defaults, nil
 }
-     
+
 func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 
 	lookup := make(map[int64][]byte)
@@ -180,6 +180,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 
 	row["source"] = gjson.GetBytes(feature, "properties.src:geom").String()
 
+	// TO DO
 	// bbox geom:bbox
 
 	supersedes := make([]string, 0)

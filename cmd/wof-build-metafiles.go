@@ -155,6 +155,8 @@ func main() {
 				fieldnames = append(fieldnames, k)
 			}
 
+			// TO DO: account for things like wof-venue-us-ca-latest.csv
+
 			outfile := fmt.Sprintf("/tmp/wof-%s-latest.csv", placetype)
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
 

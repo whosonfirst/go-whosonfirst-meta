@@ -576,6 +576,44 @@ func TestManyBasic(t *testing.T) {
 	testMany(true, `[world]`, strings.Repeat("a.", 70)+"hello")
 }
 
+func testMany(t *testing.T, json string, paths, expected []string) {
+	var result []Result
+	for i := 0; i < 2; i++ {
+		var which string
+		if i == 0 {
+			which = "Get"
+			result = nil
+			for j := 0; j < len(expected); j++ {
+				result = append(result, Get(json, paths[j]))
+			}
+		} else if i == 1 {
+			which = "GetMany"
+			result = GetMany(json, paths...)
+		}
+		for j := 0; j < len(expected); j++ {
+			if result[j].String() != expected[j] {
+				t.Fatalf("Using key '%s' for '%s'\nexpected '%v', got '%v'", paths[j], which, expected[j], result[j].String())
+			}
+		}
+	}
+}
+func TestIssue20(t *testing.T) {
+	json := `{ "name": "FirstName", "name1": "FirstName1", "address": "address1", "addressDetails": "address2", }`
+	paths := []string{"name", "name1", "address", "addressDetails"}
+	expected := []string{"FirstName", "FirstName1", "address1", "address2"}
+	t.Run("SingleMany", func(t *testing.T) { testMany(t, json, paths, expected) })
+}
+
+func TestIssue21(t *testing.T) {
+	json := `{ "Level1Field1":3, 
+	           "Level1Field4":4, 
+			   "Level1Field2":{ "Level2Field1":[ "value1", "value2" ], 
+			   "Level2Field2":{ "Level3Field1":[ { "key1":"value1" } ] } } }`
+	paths := []string{"Level1Field1", "Level1Field2.Level2Field1", "Level1Field2.Level2Field2.Level3Field1", "Level1Field4"}
+	expected := []string{"3", `[ "value1", "value2" ]`, `[ { "key1":"value1" } ]`, "4"}
+	t.Run("SingleMany", func(t *testing.T) { testMany(t, json, paths, expected) })
+}
+
 func TestRandomMany(t *testing.T) {
 	var lstr string
 	defer func() {

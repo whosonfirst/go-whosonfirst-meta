@@ -36,3 +36,4 @@ bin: 	self
 fmt:
 	go fmt meta.go
 	go fmt cmd/*.go
+	go fmt meta/*.go
