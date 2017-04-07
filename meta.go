@@ -55,14 +55,14 @@ func init() {
 
 	var err error
 
-	defaults, err = Spec()
+	defaults, err = GetDefaults()
 
 	if err != nil {
 		log.Fatal("Failed to parse defaults", err)
 	}
 }
 
-func Spec() (*WOFMetaDefaults, error) {
+func GetDefaults() (*WOFMetaDefaults, error) {
 
 	var defaults WOFMetaDefaults
 	err := json.Unmarshal([]byte(meta.Defaults), &defaults)

@@ -38,6 +38,14 @@ func main() {
 			log.Fatal(err)
 		}
 
+		defaults, err := meta.GetDefaults()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		row = defaults.EnsureDefaults(row)
+
 		if *debug {
 
 			for k, v := range row {
