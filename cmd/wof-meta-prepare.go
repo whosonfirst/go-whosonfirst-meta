@@ -38,6 +38,19 @@ func main() {
 			log.Fatal(err)
 		}
 
+		if *debug {
+
+			log.Print("--dump--")
+
+			// TO DO: sort keys
+
+			for k, v := range row {
+				log.Printf("[%s] '%s'\n", k, v)
+			}
+
+			log.Print("--dump--")
+		}
+
 		defaults, err := meta.GetDefaults()
 
 		if err != nil {
@@ -48,10 +61,18 @@ func main() {
 
 		if *debug {
 
+			log.Print("--defaults--")
+
+			// TO DO: sort keys
+
 			for k, v := range row {
 				log.Printf("[%s] '%s'\n", k, v)
 			}
 
+			log.Print("--defaults--")
+		}
+
+		if *debug {
 			continue
 		}
 

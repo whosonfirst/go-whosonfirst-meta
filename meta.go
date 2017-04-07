@@ -21,6 +21,9 @@ func (d WOFMetaDefaults) EnsureDefaults(row map[string]string) map[string]string
 
 	out := make(map[string]string)
 
+	// if anything we already have is empty check to see
+	// whether we have a default value
+
 	for k, v := range row {
 
 		if v != "" {
@@ -31,19 +34,31 @@ func (d WOFMetaDefaults) EnsureDefaults(row map[string]string) map[string]string
 		default_v, ok := d[k]
 
 		if !ok {
-			out[k] = v
+			out[k] = "__ERROR__" // what what?
 			continue
 		}
 
 		out[k] = default_v.(string)
 	}
 
+	// check to make sure that we have all the defaults
+
 	for k, default_v := range d {
 
 		_, ok := out[k]
 
 		if !ok {
+			// log.Printf("SET %s (%s)\n", k, default_v)
 			out[k] = default_v.(string)
+		}
+	}
+
+	for k, v := range out {
+
+		// clean up some weird stuff returned by gjson.GetBytes
+
+		if v == "null" {
+			out[k] = ""
 		}
 	}
 
@@ -184,7 +199,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	row["path"] = rel_path
 
 	row["name"] = gjson.GetBytes(feature, "properties.wof:name").String()
-	// row["properties"] = gjson.GetBytes(feature, "properties.wof:properties").String()
+	row["placetype"] = gjson.GetBytes(feature, "properties.wof:placetype").String()
 
 	row["source"] = gjson.GetBytes(feature, "properties.src:geom").String()
 
@@ -223,7 +238,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	lastmod_fl := gjson.GetBytes(feature, "properties.wof:lastmodified").Float()
 	lastmod := int(lastmod_fl)
 
-	row["lastmodifed"] = strconv.Itoa(lastmod)
+	row["lastmodified"] = strconv.Itoa(lastmod)
 
 	row["geom_hash"] = gjson.GetBytes(feature, "properties.geom:hash").String()
 
