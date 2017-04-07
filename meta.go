@@ -5,6 +5,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-meta/meta"
+	"github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
 	"io/ioutil"
 	"log"
@@ -27,22 +28,22 @@ func (d WOFMetaDefaults) EnsureDefaults(row map[string]string) map[string]string
 			continue
 		}
 
-		_, ok := d[k]
+		default_v, ok := d[k]
 
 		if !ok {
 			out[k] = v
 			continue
 		}
 
-		out[k] = "FIX ME"
+		out[k] = default_v.(string)
 	}
 
-	for k, _ := range d {
+	for k, default_v := range d {
 
 		_, ok := out[k]
 
 		if !ok {
-			out[k] = "FIX ME 2"
+			out[k] = default_v.(string)
 		}
 	}
 
@@ -173,7 +174,14 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	wofid_fl := gjson.GetBytes(feature, "properties.wof:id").Float()
 	wofid := int64(wofid_fl)
 
+	rel_path, err := uri.Id2RelPath(int(wofid))
+
+	if err != nil {
+		return row, err
+	}
+
 	row["id"] = strconv.FormatInt(wofid, 10)
+	row["path"] = rel_path
 
 	row["name"] = gjson.GetBytes(feature, "properties.wof:name").String()
 	// row["properties"] = gjson.GetBytes(feature, "properties.wof:properties").String()

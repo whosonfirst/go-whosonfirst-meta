@@ -49,7 +49,6 @@ func main() {
 		if *debug {
 
 			for k, v := range row {
-
 				log.Printf("[%s] '%s'\n", k, v)
 			}
 
