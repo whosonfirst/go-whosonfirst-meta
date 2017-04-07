@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 )
 
 func main() {
@@ -40,15 +41,17 @@ func main() {
 
 		if *debug {
 
-			log.Print("--dump--")
+			keys := make([]string, 0)
 
-			// TO DO: sort keys
-
-			for k, v := range row {
-				log.Printf("[%s] '%s'\n", k, v)
+			for k, _ := range row {
+				keys = append(keys, k)
 			}
 
-			log.Print("--dump--")
+			sort.Strings(keys)
+
+			for _, k := range keys {
+				log.Printf("[dump][%s] '%s'\n", k, row[k])
+			}
 		}
 
 		defaults, err := meta.GetDefaults()
@@ -61,15 +64,17 @@ func main() {
 
 		if *debug {
 
-			log.Print("--defaults--")
+			keys := make([]string, 0)
 
-			// TO DO: sort keys
-
-			for k, v := range row {
-				log.Printf("[%s] '%s'\n", k, v)
+			for k, _ := range row {
+				keys = append(keys, k)
 			}
 
-			log.Print("--defaults--")
+			sort.Strings(keys)
+
+			for _, k := range keys {
+				log.Printf("[defaults][%s] '%s'\n", k, row[k])
+			}
 		}
 
 		if *debug {

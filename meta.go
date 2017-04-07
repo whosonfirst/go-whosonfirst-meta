@@ -226,7 +226,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 		wofid := int64(wofid_fl)
 		id_str := strconv.FormatInt(wofid, 10)
 
-		supersedes = append(supersedes, id_str)
+		superseded_by = append(superseded_by, id_str)
 	}
 
 	row["superseded_by"] = strings.Join(superseded_by, ",")
