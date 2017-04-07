@@ -32,6 +32,7 @@ vendor-deps: deps
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-build-metafiles cmd/wof-build-metafiles.go
 	@GOPATH=$(GOPATH) go build -o bin/wof-update-metafile cmd/wof-update-metafile.go
+	@GOPATH=$(GOPATH) go build -o bin/wof-meta-prepare cmd/wof-meta-prepare.go
 
 fmt:
 	go fmt meta.go

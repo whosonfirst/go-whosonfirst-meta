@@ -173,10 +173,10 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	wofid_fl := gjson.GetBytes(feature, "properties.wof:id").Float()
 	wofid := int64(wofid_fl)
 
-	row["id"] = string(wofid)
+	row["id"] = strconv.FormatInt(wofid, 10)
 
 	row["name"] = gjson.GetBytes(feature, "properties.wof:name").String()
-	row["properties"] = gjson.GetBytes(feature, "properties.wof:properties").String()
+	// row["properties"] = gjson.GetBytes(feature, "properties.wof:properties").String()
 
 	row["source"] = gjson.GetBytes(feature, "properties.src:geom").String()
 
@@ -190,7 +190,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 
 		wofid_fl := r.Float()
 		wofid := int64(wofid_fl)
-		id_str := string(wofid)
+		id_str := strconv.FormatInt(wofid, 10)
 
 		supersedes = append(supersedes, id_str)
 	}
@@ -201,7 +201,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 
 		wofid_fl := r.Float()
 		wofid := int64(wofid_fl)
-		id_str := string(wofid)
+		id_str := strconv.FormatInt(wofid, 10)
 
 		supersedes = append(supersedes, id_str)
 	}
@@ -215,7 +215,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	lastmod_fl := gjson.GetBytes(feature, "properties.wof:lastmodified").Float()
 	lastmod := int(lastmod_fl)
 
-	row["lastmodifed"] = string(lastmod)
+	row["lastmodifed"] = strconv.Itoa(lastmod)
 
 	row["geom_hash"] = gjson.GetBytes(feature, "properties.geom:hash").String()
 
@@ -244,7 +244,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	parent_fl := gjson.GetBytes(feature, "properties.wof:parent_id").Float()
 	parent_id := int64(parent_fl)
 
-	row["parent_id"] = string(parent_id)
+	row["parent_id"] = strconv.FormatInt(parent_id, 10)
 
 	country_fl := gjson.GetBytes(feature, "properties.wof:hierarchy.0.country_id").Float()
 	country_id := int64(country_fl)
@@ -255,9 +255,9 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	locality_fl := gjson.GetBytes(feature, "properties.wof:hierarchy.0.locality_id").Float()
 	locality_id := int64(locality_fl)
 
-	row["country_id"] = string(country_id)
-	row["region_id"] = string(region_id)
-	row["locality_id"] = string(locality_id)
+	row["country_id"] = strconv.FormatInt(country_id, 10)
+	row["region_id"] = strconv.FormatInt(region_id, 10)
+	row["locality_id"] = strconv.FormatInt(locality_id, 10)
 
 	return row, nil
 }
