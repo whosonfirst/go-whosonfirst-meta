@@ -143,6 +143,12 @@ func main() {
 
 		placetype := gjson.GetBytes(feature, "properties.wof:placetype").String()
 
+		/*
+		if placetype != "microhood" {
+			return nil
+		}
+		*/
+
 		mu.Lock()
 
 		writer, ok := writers[placetype]
@@ -165,6 +171,7 @@ func main() {
 			}
 
 			writer, err = csv.NewDictWriter(fh, fieldnames)
+			writer.WriteHeader()
 
 			filehandles[placetype] = fh
 			writers[placetype] = writer
