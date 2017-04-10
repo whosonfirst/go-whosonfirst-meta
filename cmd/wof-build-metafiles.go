@@ -8,6 +8,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-crawl"
 	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-meta"
+	"github.com/whosonfirst/go-whosonfirst-placetypes/filter"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	_ "io"
 	"io/ioutil"
@@ -26,6 +27,10 @@ func main() {
 	procs := flag.Int("processes", runtime.NumCPU()*2, "The number of concurrent processes to use.")
 	repo := flag.String("repo", "/usr/local/data/whosonfirst-data", "The repository to create metafiles for (and in).")
 	limit := flag.Int("open-filehandles", 512, "The maximum number of file handles to keep open at any given moment.")
+
+	str_placetypes := flag.String("placetypes", "", "...")
+	str_roles := flag.String("roles", "", "Roles are not supported yet.")
+	str_exclude := flag.String("exclude", "", "...")
 
 	flag.Parse()
 
@@ -69,6 +74,28 @@ func main() {
 
 	if !info.IsDir() {
 		log.Fatal("Not a directory")
+	}
+
+	placetypes := make([]string, 0)
+	roles := make([]string, 0)
+	exclude := make([]string, 0)
+
+	if *str_placetypes != "" {
+		placetypes = strings.Split(*str_placetypes, ",")
+	}
+
+	if *str_roles != "" {
+		roles = strings.Split(*str_roles, ",")
+	}
+
+	if *str_exclude != "" {
+		exclude = strings.Split(*str_exclude, ",")
+	}
+
+	placetype_filter, err := filter.NewPlacetypesFilter(placetypes, roles, exclude)
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// this is used below when creating file handles to write to
@@ -157,19 +184,25 @@ func main() {
 			log.Fatal(err)
 		}
 
-		row, err := meta.DumpFeature(feature)
+		placetype := gjson.GetBytes(feature, "properties.wof:placetype").String()
+
+		allow, err := placetype_filter.AllowFromString(placetype)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		placetype := gjson.GetBytes(feature, "properties.wof:placetype").String()
+		// log.Printf("Allow %s : %t\n", placetype, allow)
 
-		/*
-		if placetype != "microhood" {
+		if !allow {
 			return nil
 		}
-		*/
+
+		row, err := meta.DumpFeature(feature)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		mu.Lock()
 

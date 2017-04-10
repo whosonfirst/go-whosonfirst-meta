@@ -2,11 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-uri"
+	"io"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -15,8 +14,6 @@ import (
 func main() {
 
 	var root = flag.String("root", "", "The directory where Who's On First records are stored. If empty defaults to the current working directory + \"/data\".")
-	var prefix = flag.String("prefix", "", "Prepend this prefix to all paths")
-
 	var alt = flag.Bool("alternate", false, "Encode URI as an alternate geometry")
 	var strict = flag.Bool("strict", false, "Ensure that the source for an alternate geometry is valid (see also: go-whosonfirst-sources)")
 	var source = flag.String("source", "", "The source of the alternate geometry")
@@ -36,51 +33,47 @@ func main() {
 		*root = filepath.Join(cwd, "data")
 	}
 
-	for _, str_id := range flag.Args() {
+	var args *uri.URIArgs
 
+	if *alt {
+
+		parsed := make([]string, 0)
+
+		for _, e := range strings.Split(*extras, ",") {
+
+			e = strings.Trim(e, " ")
+
+			if e != "" {
+				parsed = append(parsed, e)
+			}
+		}
+
+		args = uri.NewAlternateURIArgs(*source, *function, parsed...)
+		args.Strict = *strict
+
+	} else {
+		args = uri.NewDefaultURIArgs()
+	}
+
+	ids := flag.Args()
+
+	for _, str_id := range ids {
+
+		// id, err := strconv.ParseInt(str_id, 10, 64)
 		id, err := strconv.Atoi(str_id)
 
-		if err != nil {
-			log.Fatal("Unable to parse %s, because %v", str_id, err)
-		}
-
-		var args *uri.URIArgs
-
-		if *alt {
-
-			parsed := make([]string, 0)
-
-			for _, e := range strings.Split(*extras, ",") {
-
-				e = strings.Trim(e, " ")
-
-				if e != "" {
-					parsed = append(parsed, e)
-				}
-			}
-
-			args = uri.NewAlternateURIArgs(*source, *function, parsed...)
-			args.Strict = *strict
-
-		} else {
-			args = uri.NewDefaultURIArgs()
-		}
-
-		wof_path, err := uri.Id2RelPath(id, args)
+		abs_path, err := uri.Id2AbsPath(*root, id, args)
 
 		if err != nil {
-			log.Printf("failed to generate a URI for %s, because '%v'\n", str_id, err)
-			continue
+			log.Fatal(err)
 		}
 
-		if *prefix != "" {
-			wof_path = path.Join(*prefix, wof_path)
+		fh, err := os.Open(abs_path)
+
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		if *root != "" {
-			wof_path = path.Join(*root, wof_path)
-		}
-
-		fmt.Println(wof_path)
+		_, err = io.Copy(os.Stdout, fh)
 	}
 }

@@ -205,8 +205,8 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 
 	row["source"] = gjson.GetBytes(feature, "properties.src:geom").String()
 
-        hash := md5.Sum(feature)
-        file_hash := hex.EncodeToString(hash[:])
+	hash := md5.Sum(feature)
+	file_hash := hex.EncodeToString(hash[:])
 
 	row["file_hash"] = file_hash
 
