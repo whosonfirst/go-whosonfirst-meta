@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -22,9 +23,9 @@ import (
 
 func main() {
 
-	procs := flag.Int("processes", runtime.NumCPU()*2, "The number of concurrent processes to use")
-	repo := flag.String("repo", "", "...")
-	limit := flag.Int("open-filehandles", 512, "...")
+	procs := flag.Int("processes", runtime.NumCPU()*2, "The number of concurrent processes to use.")
+	repo := flag.String("repo", "/usr/local/data/whosonfirst-data", "The repository to create metafiles for (and in).")
+	limit := flag.Int("open-filehandles", 512, "The maximum number of file handles to keep open at any given moment.")
 
 	flag.Parse()
 
@@ -70,6 +71,12 @@ func main() {
 		log.Fatal("Not a directory")
 	}
 
+	// this is used below when creating file handles to write to
+	// (20170410/thisisaaronland)
+
+	repo_name := filepath.Base(abs_repo)
+	repo_suffix := strings.Replace(repo_name, "whosonfirst-data-", "", -1)
+
 	mu := new(sync.Mutex)
 
 	throttle := make(chan bool, *limit)
@@ -80,10 +87,14 @@ func main() {
 	}
 
 	var count int32
-	count = 0
-
 	var open int32
+	var pending int32
+	var scheduled int32
+
+	count = 0
 	open = 0
+	pending = 0
+	scheduled = 0
 
 	filehandles := make(map[string]*atomicfile.File)
 	writers := make(map[string]*csv.DictWriter)
@@ -95,12 +106,23 @@ func main() {
 		}
 	}()
 
+	wg := new(sync.WaitGroup)
+
 	callback := func(path string, info os.FileInfo) error {
+
+		atomic.AddInt32(&pending, 1)
+		// log.Printf("pending %d scheduled %d\n", pending, scheduled)
 
 		<-throttle
 
+		atomic.AddInt32(&pending, -1)
+		atomic.AddInt32(&scheduled, 1)
+
+		wg.Add(1)
+
 		defer func() {
 			throttle <- true
+			wg.Done()
 		}()
 
 		if info.IsDir() {
@@ -161,9 +183,17 @@ func main() {
 				fieldnames = append(fieldnames, k)
 			}
 
-			// TO DO: account for things like wof-venue-us-ca-latest.csv
+			// repo_suffix is set above before we start processing
+			// files (20170410/thisisaaronland)
 
-			outfile := fmt.Sprintf("/tmp/wof-%s-latest.csv", placetype)
+			fname := fmt.Sprintf("wof-%s-latest.csv", placetype)
+
+			if repo_suffix != "whosonfirst-data" {
+				fname = fmt.Sprintf("wof-%s-latest.csv", repo_suffix)
+			}
+
+			outfile := filepath.Join("/tmp", fname)
+
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
 
 			if err != nil {
@@ -177,9 +207,9 @@ func main() {
 			writers[placetype] = writer
 		}
 
-		mu.Unlock()
-
 		writer.WriteRow(row)
+
+		mu.Unlock()
 
 		atomic.AddInt32(&count, 1)
 		return nil
@@ -189,6 +219,8 @@ func main() {
 
 	cr := crawl.NewCrawler(abs_data)
 	err = cr.Crawl(callback)
+
+	wg.Wait()
 
 	t2 := time.Since(t1)
 	log.Printf("time to dump %d features: %v\n", count, t2)
