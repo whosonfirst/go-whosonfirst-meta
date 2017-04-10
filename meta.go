@@ -1,6 +1,8 @@
 package meta
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-whosonfirst-csv"
@@ -203,8 +205,23 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 
 	row["source"] = gjson.GetBytes(feature, "properties.src:geom").String()
 
-	// TO DO
-	// bbox geom:bbox
+        hash := md5.Sum(feature)
+        file_hash := hex.EncodeToString(hash[:])
+
+	row["file_hash"] = file_hash
+
+	bbox := gjson.GetBytes(feature, "bbox")
+
+	if bbox.Exists() {
+
+		str_bbox := make([]string, 0)
+
+		for _, pt := range bbox.Array() {
+			str_bbox = append(str_bbox, pt.String())
+		}
+
+		row["bbox"] = strings.Join(str_bbox, ",")
+	}
 
 	supersedes := make([]string, 0)
 	superseded_by := make([]string, 0)
