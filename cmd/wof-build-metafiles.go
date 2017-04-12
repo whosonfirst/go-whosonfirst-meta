@@ -24,13 +24,15 @@ import (
 
 func main() {
 
+	repo := flag.String("repo", "/usr/local/data/whosonfirst-data", "Where to read data (to create metafiles) from.")
+	out := flag.String("out", "", "Where to store metafiles. If empty then assume metafile are created in a child folder of 'repo' called 'meta'.")
+
 	procs := flag.Int("processes", runtime.NumCPU()*2, "The number of concurrent processes to use.")
-	repo := flag.String("repo", "/usr/local/data/whosonfirst-data", "The repository to create metafiles for (and in).")
 	limit := flag.Int("open-filehandles", 512, "The maximum number of file handles to keep open at any given moment.")
 
-	str_placetypes := flag.String("placetypes", "", "...")
-	str_roles := flag.String("roles", "", "Roles are not supported yet.")
-	str_exclude := flag.String("exclude", "", "...")
+	str_placetypes := flag.String("placetypes", "", "A comma-separated list of placetypes that meta files will be created for. All other placetypes will be ignored.")
+	str_roles := flag.String("roles", "", "Role-based filters are not supported yet.")
+	str_exclude := flag.String("exclude", "", "A comma-separated list of placetypes that meta files will not be created for.")
 
 	flag.Parse()
 
@@ -49,10 +51,16 @@ func main() {
 	}
 
 	if !info.IsDir() {
-		log.Fatal("Not a directory")
+		log.Fatal(fmt.Sprintf("Invalid repo directory (%s)", abs_repo))
 	}
 
-	abs_meta := filepath.Join(abs_repo, "meta")
+	var abs_meta string
+
+	if *out == "" {
+		abs_meta = filepath.Join(abs_repo, "meta")
+	} else {
+		abs_meta = *out
+	}
 
 	info, err = os.Stat(abs_meta)
 
@@ -61,7 +69,7 @@ func main() {
 	}
 
 	if !info.IsDir() {
-		log.Fatal("Not a directory")
+		log.Fatal(fmt.Sprintf("Invalid meta directory (%s)", abs_meta))
 	}
 
 	abs_data := filepath.Join(abs_repo, "data")
@@ -73,7 +81,7 @@ func main() {
 	}
 
 	if !info.IsDir() {
-		log.Fatal("Not a directory")
+		log.Fatal(fmt.Sprintf("Invalid data directory (%s)", abs_data))
 	}
 
 	placetypes := make([]string, 0)
@@ -225,7 +233,7 @@ func main() {
 				fname = fmt.Sprintf("wof-%s-latest.csv", repo_suffix)
 			}
 
-			outfile := filepath.Join("/tmp", fname)
+			outfile := filepath.Join(abs_meta, fname)
 
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
 
