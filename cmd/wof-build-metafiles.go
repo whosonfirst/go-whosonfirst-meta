@@ -207,7 +207,7 @@ func main() {
 			return nil
 		}
 
-		row, err := meta.DumpFeature(feature)
+		row, err := meta.FeatureToRow(feature)
 
 		if err != nil {
 			log.Fatal(err)

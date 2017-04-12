@@ -93,6 +93,21 @@ func GetDefaults() (*WOFMetaDefaults, error) {
 	return &defaults, nil
 }
 
+func FeatureToRow(feature []byte) (map[string]string, error) {
+
+	row := make(map[string]string)
+
+	dump, err := DumpFeature(feature)
+
+	if err != nil {
+		return row, err
+	}
+
+	row = defaults.EnsureDefaults(dump)
+
+	return row, nil
+}
+
 func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 
 	lookup := make(map[int64][]byte)
@@ -153,13 +168,13 @@ func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 
 		if ok {
 
-			new_row, err := DumpFeature(feature)
+			new_row, err := FeatureToRow(feature)
 
 			if err != nil {
 				return err
 			}
 
-			row = defaults.EnsureDefaults(new_row)
+			row = new_row
 		}
 
 		if writer == nil {
