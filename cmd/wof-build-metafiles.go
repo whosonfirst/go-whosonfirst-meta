@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -223,6 +224,8 @@ func main() {
 			for k, _ := range row {
 				fieldnames = append(fieldnames, k)
 			}
+
+			sort.Strings(fieldnames)
 
 			// repo_suffix is set above before we start processing
 			// files (20170410/thisisaaronland)

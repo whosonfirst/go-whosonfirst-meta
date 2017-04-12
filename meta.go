@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -168,6 +169,8 @@ func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 			for k, _ := range row {
 				fieldnames = append(fieldnames, k)
 			}
+
+			sort.Strings(fieldnames)
 
 			writer, err = csv.NewDictWriter(dest, fieldnames)
 
