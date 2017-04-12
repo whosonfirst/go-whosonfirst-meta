@@ -259,6 +259,25 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 
 	row["geom_hash"] = gjson.GetBytes(feature, "properties.geom:hash").String()
 
+	// this shouldn't happen and suggests a bug in the export code but in reality
+	// it does still happen sometimes so don't make it a user's problem...
+	// (20170412/thisisaaronland)
+
+	if row["geom_hash"] == "null" || row["geom_hash"] == "" {
+
+		geom := gjson.GetBytes(feature, "geometry")
+		body, err := json.Marshal(geom.Value())
+
+		if err != nil {
+			return row, err
+		}
+
+		hash := md5.Sum(body)
+		geom_hash := hex.EncodeToString(hash[:])
+
+		row["geom_hash"] = geom_hash
+	}
+
 	geom_lat := gjson.GetBytes(feature, "properties.geom:latitude").Float()
 	geom_lon := gjson.GetBytes(feature, "properties.geom:longitude").Float()
 
