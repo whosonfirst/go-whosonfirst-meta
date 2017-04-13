@@ -165,6 +165,16 @@ func main() {
 			return nil
 		}
 
+		wof, err := uri.IsWOFFile(path)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if !wof {
+			return nil
+		}
+
 		alt, err := uri.IsAltFile(path)
 
 		if err != nil {
@@ -198,7 +208,8 @@ func main() {
 		allow, err := placetype_filter.AllowFromString(placetype)
 
 		if err != nil {
-			log.Fatal(err)
+			log.Println(fmt.Sprintf("Unable to validate placetype (%s) for %s", placetype, path))
+			// log.Fatal(err)
 		}
 
 		// log.Printf("Allow %s : %t\n", placetype, allow)
