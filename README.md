@@ -2,10 +2,6 @@
 
 Go package for working with Who's On First meta files
 
-## Important
-
-It's early days so the documentation is not great yet. Sorry.
-
 ## Install
 
 You will need to have both `Go` and the `make` programs installed on your computer. Assuming you do just type:
