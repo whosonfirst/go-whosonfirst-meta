@@ -209,7 +209,7 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	wofid_fl := gjson.GetBytes(feature, "properties.wof:id").Float()
 	wofid := int64(wofid_fl)
 
-	rel_path, err := uri.Id2RelPath(int(wofid))
+	rel_path, err := uri.Id2RelPath(wofid)
 
 	if err != nil {
 		return row, err

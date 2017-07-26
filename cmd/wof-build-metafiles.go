@@ -9,6 +9,7 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-meta"
 	"github.com/whosonfirst/go-whosonfirst-placetypes/filter"
+	"github.com/whosonfirst/go-whosonfirst-repo"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	_ "io"
 	"io/ioutil"
@@ -25,7 +26,7 @@ import (
 
 func main() {
 
-	repo := flag.String("repo", "", "Where to read data (to create metafiles) from. If empty then the code will assume the current working directory.")
+	repo_path := flag.String("repo", "", "Where to read data (to create metafiles) from. If empty then the code will assume the current working directory.")
 	out := flag.String("out", "", "Where to store metafiles. If empty then assume metafile are created in a child folder of 'repo' called 'meta'.")
 
 	procs := flag.Int("processes", runtime.NumCPU()*2, "The number of concurrent processes to use.")
@@ -39,18 +40,18 @@ func main() {
 
 	runtime.GOMAXPROCS(*procs)
 
-	if *repo == "" {
+	if *repo_path == "" {
 
 		cwd, err := os.Getwd()
 
 		if err != nil {
-		   log.Fatal(err)
+			log.Fatal(err)
 		}
 
-		*repo = cwd
+		*repo_path = cwd
 	}
 
-	abs_repo, err := filepath.Abs(*repo)
+	abs_repo, err := filepath.Abs(*repo_path)
 
 	if err != nil {
 		log.Fatal(err)
@@ -64,6 +65,12 @@ func main() {
 
 	if !info.IsDir() {
 		log.Fatal(fmt.Sprintf("Invalid repo directory (%s)", abs_repo))
+	}
+
+	r, err := repo.NewDataRepoFromPath(abs_repo)
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	var abs_meta string
@@ -252,7 +259,8 @@ func main() {
 			// repo_suffix is set above before we start processing
 			// files (20170410/thisisaaronland)
 
-			fname := fmt.Sprintf("wof-%s-latest.csv", placetype)
+			template := r.MetafileNameTemplate()
+			fname := fmt.Sprintf(template, placetype)
 
 			if repo_suffix != "whosonfirst-data" {
 				fname = fmt.Sprintf("wof-%s-latest.csv", repo_suffix)
