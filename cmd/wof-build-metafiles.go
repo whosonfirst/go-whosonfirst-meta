@@ -250,7 +250,11 @@ func main() {
 
 			sort.Strings(fieldnames)
 
-			fname := r.MetaFilename(placetype)
+			opts := repo.DefaultFilenameOptions()
+			opts.Placetype = placetype
+
+			fname := r.MetaFilename(opts)
+
 			outfile := filepath.Join(abs_meta, fname)
 
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
