@@ -125,12 +125,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// this is used below when creating file handles to write to
-	// (20170410/thisisaaronland)
-
-	repo_name := filepath.Base(abs_repo)
-	repo_suffix := strings.Replace(repo_name, "whosonfirst-data-", "", -1)
-
 	mu := new(sync.Mutex)
 
 	throttle := make(chan bool, *limit)
@@ -256,15 +250,8 @@ func main() {
 
 			sort.Strings(fieldnames)
 
-			// repo_suffix is set above before we start processing
-			// files (20170410/thisisaaronland)
-
 			template := r.MetafileNameTemplate()
 			fname := fmt.Sprintf(template, placetype)
-
-			if repo_suffix != "whosonfirst-data" {
-				fname = fmt.Sprintf("wof-%s-latest.csv", repo_suffix)
-			}
 
 			outfile := filepath.Join(abs_meta, fname)
 
