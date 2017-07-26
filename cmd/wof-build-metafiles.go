@@ -250,9 +250,7 @@ func main() {
 
 			sort.Strings(fieldnames)
 
-			template := r.MetafileNameTemplate()
-			fname := fmt.Sprintf(template, placetype)
-
+			fname := r.MetaFilename(placetype)
 			outfile := filepath.Join(abs_meta, fname)
 
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
