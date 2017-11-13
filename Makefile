@@ -12,9 +12,20 @@ self:   prep rmdeps
 	cp -r vendor/src/* src/
 
 rmdeps:
-	if test -d src; then rm -rf src; fi 
+	if test -d src; then rm -rf src; fi
 
 build:	fmt bin
+
+dist:
+	OS=darwin make dist-os
+	OS=windows make dist-os
+	OS=linux make dist-os
+
+dist-os:
+	mkdir -p dist/$(OS)
+	GOOS=$(OS) GOPATH=$(GOPATH) GOARCH=386 go build -o dist/$(OS)/wof-build-metafiles cmd/wof-build-metafiles.go
+	GOOS=$(OS) GOPATH=$(GOPATH) GOARCH=386 go build -o dist/$(OS)/wof-update-metafile cmd/wof-update-metafile.go
+	GOOS=$(OS) GOPATH=$(GOPATH) GOARCH=386 go build -o dist/$(OS)/wof-meta-prepare cmd/wof-meta-prepare.go
 
 deps:   rmdeps
 	@GOPATH=$(GOPATH) go get -u "github.com/facebookgo/atomicfile"
