@@ -16,19 +16,19 @@ rmdeps:
 
 build:	fmt bin
 
-build-dist:
-	OS=darwin make build-dist-os
-	OS=windows make build-dist-os
-	OS=linux make build-dist-os
+dist:
+	OS=darwin make dist-os
+	OS=windows make dist-os
+	OS=linux make dist-os
 
-build-dist-os:
+dist-os:
 	mkdir -p dist/$(OS)
 	GOOS=$(OS) GOPATH=$(GOPATH) GOARCH=386 go build -o dist/$(OS)/wof-build-metafiles cmd/wof-build-metafiles.go
-	GOOS=$(OS) GOPATH=$(GOPATH) GOARCH=386 go build -o dist/$(OS)/wof-update-metafile cmd/wof-update-metafile.go
-	GOOS=$(OS) GOPATH=$(GOPATH) GOARCH=386 go build -o dist/$(OS)/wof-meta-prepare cmd/wof-meta-prepare.go
+	chmod +x dist/$(OS)/wof-build-metafiles
 	cd dist/$(OS) && shasum -a 256 wof-build-metafiles > wof-build-metafiles.sha256
-	cd dist/$(OS) && shasum -a 256 wof-update-metafile > wof-update-metafile.sha256
-	cd dist/$(OS) && shasum -a 256 wof-meta-prepare > wof-meta-prepare.sha256
+
+rmdist:
+	if test -d dist; then rm -rf dist; fi
 
 deps:   rmdeps
 	@GOPATH=$(GOPATH) go get -u "github.com/facebookgo/atomicfile"
