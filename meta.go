@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/tidwall/gjson"
 	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-meta/meta"
@@ -218,7 +220,14 @@ func DumpFeature(feature []byte) (map[string]string, error) {
 	row["id"] = strconv.FormatInt(wofid, 10)
 	row["path"] = rel_path
 
-	row["name"] = gjson.GetBytes(feature, "properties.wof:name").String()
+	name := gjson.GetBytes(feature, "properties.wof:name")
+
+	if !name.Exists(){
+		msg := fmt.Sprintf("ID %d is missing wof:name!", wofid)
+		return row, errors.New(msg)
+	}
+
+	row["name"] = name.String()
 	row["placetype"] = gjson.GetBytes(feature, "properties.wof:placetype").String()
 
 	row["source"] = gjson.GetBytes(feature, "properties.src:geom").String()
