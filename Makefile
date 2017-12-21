@@ -16,7 +16,7 @@ rmdeps:
 
 build:	fmt bin
 
-dist:
+dist-build:
 	OS=darwin make dist-os
 	OS=windows make dist-os
 	OS=linux make dist-os
