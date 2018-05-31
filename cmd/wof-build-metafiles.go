@@ -64,6 +64,8 @@ func main() {
 		exclude = strings.Split(*str_exclude, ",")
 	}
 
+	var abs_root string
+
 	if *out == "" {
 
 		cwd, err := os.Getwd()
@@ -72,7 +74,16 @@ func main() {
 			log.Fatal(err)
 		}
 
-		*out = cwd
+		abs_root = cwd
+	} else {
+
+		abs_out, err := filepath.Abs(*out)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		abs_root = abs_out
 	}
 
 	placetype_filter, err := filter.NewPlacetypesFilter(placetypes, roles, exclude)
@@ -101,18 +112,6 @@ func main() {
 
 	filehandles := make(map[string]*atomicfile.File)
 	writers := make(map[string]*csv.DictWriter)
-
-	defer func() {
-
-		for _, fh := range filehandles {
-
-			// TO DO: CHECK TO SEE IF WE SHOULD ABORT RATHER THAN CLOSE
-			// (20180531/thisisaaronland)
-
-			fh.Close()
-
-		}
-	}()
 
 	wg := new(sync.WaitGroup)
 
@@ -179,8 +178,7 @@ func main() {
 		row, err := meta.FeatureToRow(f.Bytes())
 
 		if err != nil {
-			log.Println("BAD META", f.Id())
-			return nil
+			return err
 		}
 
 		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f))
@@ -190,6 +188,7 @@ func main() {
 		}
 
 		mu.Lock()
+		defer mu.Unlock()
 
 		writer, ok := writers[target]
 
@@ -211,11 +210,16 @@ func main() {
 
 			fname := r.MetaFilename(opts)
 
-			// THIS STILL NEEDS SOME FINESSING IF ONLY TO PRESERVE BACKWARDS
-			// COMPATIBILITY IF RUNNING WITH -mode repo
+			abs_meta := abs_root
+
+			// this is just for backwards compatibility
 			// (20180531/thisisaaronland)
 
-			outfile := filepath.Join(*out, fname)
+			if *out == "" && *mode == "repo" {
+				abs_meta = filepath.Join(abs_root, "meta")
+			}
+
+			outfile := filepath.Join(abs_meta, fname)
 
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
 
@@ -237,8 +241,6 @@ func main() {
 
 		writer.WriteRow(row)
 
-		mu.Unlock()
-
 		atomic.AddInt32(&count, 1)
 		return nil
 	}
@@ -249,9 +251,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	t1 := time.Now()
+	var index_err error
 
-	// TO DO: context ALL THE THINGS...
+	t1 := time.Now()
 
 	for _, path := range flag.Args() {
 
@@ -259,16 +261,16 @@ func main() {
 
 		err := i.IndexPath(path)
 
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		tb := time.Since(ta)
 
 		if *timings {
 			log.Printf("time to prepare %s %v\n", path, tb)
 		}
 
+		if err != nil {
+			index_err = err
+			break
+		}
 	}
 
 	t2 := time.Since(t1)
@@ -276,5 +278,18 @@ func main() {
 	if *timings {
 		c := atomic.LoadInt32(&count)
 		log.Printf("time to prepare all %d records %v\n", c, t2)
+	}
+
+	for _, fh := range filehandles {
+
+		if index_err != nil {
+			fh.Abort()
+		} else {
+			fh.Close()
+		}
+	}
+
+	if index_err != nil {
+		log.Fatal(index_err)
 	}
 }
