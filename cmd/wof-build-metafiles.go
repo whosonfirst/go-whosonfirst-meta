@@ -14,7 +14,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-placetypes/filter"
 	"github.com/whosonfirst/go-whosonfirst-repo"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -109,7 +108,7 @@ func main() {
 
 			// TO DO: CHECK TO SEE IF WE SHOULD ABORT RATHER THAN CLOSE
 			// (20180531/thisisaaronland)
-			
+
 			fh.Close()
 
 		}
@@ -159,12 +158,6 @@ func main() {
 		atomic.AddInt32(&open, 1)
 		defer atomic.AddInt32(&open, -1)
 
-		feature, err := ioutil.ReadAll(fh)
-
-		if err != nil {
-			return err
-		}
-
 		placetype := f.Placetype()
 
 		allow, err := placetype_filter.AllowFromString(placetype)
@@ -180,13 +173,14 @@ func main() {
 
 		// THIS NEEDS TO BE MORE SOPHISTICATED THAN "just placetype" BUT
 		// TODAY IT IS NOT... (20180531/thisisaaronland)
-		
+
 		target := placetype
 
-		row, err := meta.FeatureToRow(feature)
+		row, err := meta.FeatureToRow(f.Bytes())
 
 		if err != nil {
-			return err
+			log.Println("BAD META", f.Id())
+			return nil
 		}
 
 		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f))
@@ -208,33 +202,33 @@ func main() {
 			}
 
 			sort.Strings(fieldnames)
-			
-			       // HOW DOES THIS SQUARE WITH target ABOVE?
-			       // (20180531/thisisaaronland)
-			       
-				opts := repo.DefaultFilenameOptions()
-				opts.Placetype = placetype
 
-				fname := r.MetaFilename(opts)
+			// HOW DOES THIS SQUARE WITH target ABOVE?
+			// (20180531/thisisaaronland)
 
-				// THIS STILL NEEDS SOME FINESSING IF ONLY TO PRESERVE BACKWARDS
-				// COMPATIBILITY IF RUNNING WITH -mode repo
-				// (20180531/thisisaaronland)
+			opts := repo.DefaultFilenameOptions()
+			opts.Placetype = placetype
 
-				outfile := filepath.Join(*out, fname)
+			fname := r.MetaFilename(opts)
 
-				fh, err := atomicfile.New(outfile, os.FileMode(0644))
+			// THIS STILL NEEDS SOME FINESSING IF ONLY TO PRESERVE BACKWARDS
+			// COMPATIBILITY IF RUNNING WITH -mode repo
+			// (20180531/thisisaaronland)
 
-				if err != nil {
-					return err
-				}
+			outfile := filepath.Join(*out, fname)
 
-				writer, err = csv.NewDictWriter(fh, fieldnames)
+			fh, err := atomicfile.New(outfile, os.FileMode(0644))
 
 			if err != nil {
-			   return err
+				return err
 			}
-			
+
+			writer, err = csv.NewDictWriter(fh, fieldnames)
+
+			if err != nil {
+				return err
+			}
+
 			writer.WriteHeader()
 
 			filehandles[placetype] = fh
@@ -258,7 +252,7 @@ func main() {
 	t1 := time.Now()
 
 	// TO DO: context ALL THE THINGS...
-	
+
 	for _, path := range flag.Args() {
 
 		ta := time.Now()
