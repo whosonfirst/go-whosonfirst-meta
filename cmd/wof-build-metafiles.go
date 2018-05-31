@@ -28,7 +28,7 @@ import (
 func main() {
 
 	mode := flag.String("mode", "repo", "Where to read data (to create metafiles) from. If empty then the code will assume the current working directory.")
-	out := flag.String("out", "", "Where to store metafiles. If empty then assume metafile are created in a child folder of 'repo' called 'meta'.")
+	out := flag.String("out", "", "Where to store metafiles. If empty then assume metafile are created in the current working directory.")
 
 	limit := flag.Int("open-filehandles", 512, "The maximum number of file handles to keep open at any given moment.")
 
@@ -42,6 +42,10 @@ func main() {
 
 	flag.Parse()
 
+	if *procs != 0 {
+		log.Println("the -procs flag has been deprecated and will be ignored")
+	}
+	
 	placetypes := make([]string, 0)
 	roles := make([]string, 0)
 	exclude := make([]string, 0)
@@ -56,6 +60,17 @@ func main() {
 
 	if *str_exclude != "" {
 		exclude = strings.Split(*str_exclude, ",")
+	}
+
+	if *out == "" {
+
+		cwd, err := os.Getwd()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		*out = cwd
 	}
 
 	placetype_filter, err := filter.NewPlacetypesFilter(placetypes, roles, exclude)
@@ -186,7 +201,11 @@ func main() {
 
 			fname := r.MetaFilename(opts)
 
-			outfile := filepath.Join(abs_meta, fname)
+			// THIS STILL NEEDS SOME FINESSING IF ONLY TO PRESERVE BACKWARDS
+			// COMPATIBILITY IF RUNNING WITH -mode repo
+			// (20180531/thisisaaronland)
+			
+			outfile := filepath.Join(*out, fname)
 
 			fh, err := atomicfile.New(outfile, os.FileMode(0644))
 
