@@ -1,13 +1,13 @@
 package main
 
 import (
-       "context"
+	"context"
 	"flag"
 	"fmt"
 	"github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"	
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	"github.com/whosonfirst/go-whosonfirst-index"
 	"github.com/whosonfirst/go-whosonfirst-index/utils"
 	"github.com/whosonfirst/go-whosonfirst-meta"
@@ -30,6 +30,9 @@ func main() {
 	mode := flag.String("mode", "repo", "Where to read data (to create metafiles) from. If empty then the code will assume the current working directory.")
 	out := flag.String("out", "", "Where to store metafiles. If empty then assume metafile are created in the current working directory.")
 
+	// blah blah blah interface definition mismatch atomicfile blah blah blah...
+	// stdout := flag.Bool("stdout", false, "Write meta file(s) to STDOUT")
+
 	limit := flag.Int("open-filehandles", 512, "The maximum number of file handles to keep open at any given moment.")
 
 	str_placetypes := flag.String("placetypes", "", "A comma-separated list of placetypes that meta files will be created for. All other placetypes will be ignored.")
@@ -45,7 +48,7 @@ func main() {
 	if *procs != 0 {
 		log.Println("the -procs flag has been deprecated and will be ignored")
 	}
-	
+
 	placetypes := make([]string, 0)
 	roles := make([]string, 0)
 	exclude := make([]string, 0)
@@ -103,7 +106,12 @@ func main() {
 	defer func() {
 
 		for _, fh := range filehandles {
+
+			// TO DO: CHECK TO SEE IF WE SHOULD ABORT RATHER THAN CLOSE
+			// (20180531/thisisaaronland)
+			
 			fh.Close()
+
 		}
 	}()
 
@@ -154,7 +162,7 @@ func main() {
 		feature, err := ioutil.ReadAll(fh)
 
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		placetype := f.Placetype()
@@ -170,6 +178,11 @@ func main() {
 			return nil
 		}
 
+		// THIS NEEDS TO BE MORE SOPHISTICATED THAN "just placetype" BUT
+		// TODAY IT IS NOT... (20180531/thisisaaronland)
+		
+		target := placetype
+
 		row, err := meta.FeatureToRow(feature)
 
 		if err != nil {
@@ -179,12 +192,12 @@ func main() {
 		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f))
 
 		if err != nil {
-			return err		   
+			return err
 		}
-		
+
 		mu.Lock()
 
-		writer, ok := writers[placetype]
+		writer, ok := writers[target]
 
 		if !ok {
 
@@ -195,25 +208,33 @@ func main() {
 			}
 
 			sort.Strings(fieldnames)
-
-			opts := repo.DefaultFilenameOptions()
-			opts.Placetype = placetype
-
-			fname := r.MetaFilename(opts)
-
-			// THIS STILL NEEDS SOME FINESSING IF ONLY TO PRESERVE BACKWARDS
-			// COMPATIBILITY IF RUNNING WITH -mode repo
-			// (20180531/thisisaaronland)
 			
-			outfile := filepath.Join(*out, fname)
+			       // HOW DOES THIS SQUARE WITH target ABOVE?
+			       // (20180531/thisisaaronland)
+			       
+				opts := repo.DefaultFilenameOptions()
+				opts.Placetype = placetype
 
-			fh, err := atomicfile.New(outfile, os.FileMode(0644))
+				fname := r.MetaFilename(opts)
+
+				// THIS STILL NEEDS SOME FINESSING IF ONLY TO PRESERVE BACKWARDS
+				// COMPATIBILITY IF RUNNING WITH -mode repo
+				// (20180531/thisisaaronland)
+
+				outfile := filepath.Join(*out, fname)
+
+				fh, err := atomicfile.New(outfile, os.FileMode(0644))
+
+				if err != nil {
+					return err
+				}
+
+				writer, err = csv.NewDictWriter(fh, fieldnames)
 
 			if err != nil {
-				log.Fatal(err)
+			   return err
 			}
-
-			writer, err = csv.NewDictWriter(fh, fieldnames)
+			
 			writer.WriteHeader()
 
 			filehandles[placetype] = fh
@@ -236,6 +257,8 @@ func main() {
 
 	t1 := time.Now()
 
+	// TO DO: context ALL THE THINGS...
+	
 	for _, path := range flag.Args() {
 
 		ta := time.Now()
