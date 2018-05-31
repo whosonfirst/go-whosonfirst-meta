@@ -7,6 +7,7 @@ import (
 	"github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"	
 	"github.com/whosonfirst/go-whosonfirst-index"
 	"github.com/whosonfirst/go-whosonfirst-index/utils"
 	"github.com/whosonfirst/go-whosonfirst-meta"
@@ -160,6 +161,12 @@ func main() {
 			return err
 		}
 
+		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f))
+
+		if err != nil {
+			return err		   
+		}
+		
 		mu.Lock()
 
 		writer, ok := writers[placetype]
