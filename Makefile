@@ -42,6 +42,7 @@ deps:   rmdeps
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-repo"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-uri"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-log"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/warning"
 
 vendor-deps: rmdeps deps
 	if test ! -d vendor; then mkdir vendor; fi

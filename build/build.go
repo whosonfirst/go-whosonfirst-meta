@@ -12,7 +12,8 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-meta"
 	"github.com/whosonfirst/go-whosonfirst-meta/options"
 	"github.com/whosonfirst/go-whosonfirst-placetypes/filter"
-	"github.com/whosonfirst/go-whosonfirst-repo"
+ 	"github.com/whosonfirst/go-whosonfirst-repo"
+ 	"github.com/whosonfirst/warning"
 	"io"
 	"log"
 	"os"
@@ -89,7 +90,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, paths []string) ([]
 
 		f, err := feature.LoadFeatureFromReader(fh)
 
-		if err != nil {
+		if err != nil && !warning.IsWarning(err){
 			return err
 		}
 
