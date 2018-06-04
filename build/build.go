@@ -101,7 +101,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, paths []string) ([]
 
 		allow, err := placetype_filter.AllowFromString(placetype)
 
-		if err != nil {
+		if err != nil && !warning.IsWarning(err) {
 			log.Println(fmt.Sprintf("Unable to validate placetype (%s) for %s", placetype, path))
 			return err
 		}
