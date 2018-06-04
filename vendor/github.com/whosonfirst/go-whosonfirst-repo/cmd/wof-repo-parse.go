@@ -11,9 +11,11 @@ func main() {
 
 	flag.Parse()
 
+	opts := repo.DefaultFilenameOptions()
+
 	for _, name := range flag.Args() {
 
-		r, err := repo.NewDataRepoFromString(name)
+		r, err := repo.NewDataRepoFromString(name, opts)
 
 		if err != nil {
 			log.Fatal(err)

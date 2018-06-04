@@ -23,6 +23,7 @@ type DataRepo struct {
 
 type FilenameOptions struct {
 	Placetype string
+	StrictPlacetypes bool
 	Dated     bool
 }
 
@@ -31,12 +32,13 @@ func DefaultFilenameOptions() *FilenameOptions {
 	o := FilenameOptions{
 		Placetype: "",
 		Dated:     false,
+		StrictPlacetypes: false,
 	}
 
 	return &o
 }
 
-func NewDataRepoFromPath(path string) (*DataRepo, error) {
+func NewDataRepoFromPath(path string, opts *FilenameOptions) (*DataRepo, error) {
 
 	abs_path, err := filepath.Abs(path)
 
@@ -45,10 +47,11 @@ func NewDataRepoFromPath(path string) (*DataRepo, error) {
 	}
 
 	repo := filepath.Base(abs_path)
-	return NewDataRepoFromString(repo)
+
+	return NewDataRepoFromString(repo, opts)
 }
 
-func NewDataRepoFromString(repo string) (*DataRepo, error) {
+func NewDataRepoFromString(repo string, opts *FilenameOptions) (*DataRepo, error) {
 
 	parts := strings.Split(repo, "-")
 
@@ -80,7 +83,7 @@ func NewDataRepoFromString(repo string) (*DataRepo, error) {
 
 		placetype := parts[2]
 
-		if !placetypes.IsValidPlacetype(placetype) {
+		if opts.StrictPlacetypes && !placetypes.IsValidPlacetype(placetype) {
 			return nil, errors.New("Invalid placetype")
 		}
 

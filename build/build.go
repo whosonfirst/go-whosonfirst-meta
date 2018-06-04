@@ -95,7 +95,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, paths []string) ([]
 
 		atomic.AddInt32(&open, 1)
 		defer atomic.AddInt32(&open, -1)
-
+		
 		placetype := f.Placetype()
 
 		allow, err := placetype_filter.AllowFromString(placetype)
@@ -118,9 +118,11 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, paths []string) ([]
 
 		if err != nil {
 			return err
-		}
+		}	
 
-		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f))
+		f_opts := repo.DefaultFilenameOptions()
+
+		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f), f_opts)
 
 		if err != nil {
 			return err
