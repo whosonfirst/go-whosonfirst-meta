@@ -8,6 +8,7 @@ self:   prep rmdeps
 	if test ! -d src; then mkdir src; fi
 	if test ! -d src/github.com/whosonfirst/go-whosonfirst-meta; then mkdir -p src/github.com/whosonfirst/go-whosonfirst-meta/; fi
 	cp  meta.go src/github.com/whosonfirst/go-whosonfirst-meta/
+	cp -r build src/github.com/whosonfirst/go-whosonfirst-meta/
 	cp -r meta src/github.com/whosonfirst/go-whosonfirst-meta/
 	cp -r vendor/* src/
 
@@ -39,6 +40,7 @@ deps:   rmdeps
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-placetypes"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-repo"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-uri"
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-log"
 
 vendor-deps: rmdeps deps
 	if test ! -d vendor; then mkdir vendor; fi
