@@ -10,6 +10,7 @@ self:   prep rmdeps
 	cp  meta.go src/github.com/whosonfirst/go-whosonfirst-meta/
 	cp -r build src/github.com/whosonfirst/go-whosonfirst-meta/
 	cp -r meta src/github.com/whosonfirst/go-whosonfirst-meta/
+	cp -r options src/github.com/whosonfirst/go-whosonfirst-meta/
 	cp -r vendor/* src/
 
 rmdeps:
@@ -55,6 +56,8 @@ bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-meta-prepare cmd/wof-meta-prepare.go
 
 fmt:
-	go fmt meta.go
+	go fmt *.go
+	go fmt build/*.go
 	go fmt cmd/*.go
 	go fmt meta/*.go
+	go fmt options/*.go

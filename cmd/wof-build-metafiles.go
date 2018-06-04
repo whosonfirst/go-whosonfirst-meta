@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/whosonfirst/go-whosonfirst-meta/build"
+	"github.com/whosonfirst/go-whosonfirst-meta/options"
 	"log"
 	"os"
 	"path/filepath"
@@ -71,7 +72,7 @@ func main() {
 		abs_root = abs_out
 	}
 
-	opts, err := build.NewDefaultBuildOptions()
+	opts, err := options.DefaultBuildOptions()
 
 	if err != nil {
 		log.Fatal(err)
