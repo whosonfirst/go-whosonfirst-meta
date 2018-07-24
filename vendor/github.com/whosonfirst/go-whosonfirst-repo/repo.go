@@ -200,7 +200,7 @@ func (r *DataRepo) filename(opts *FilenameOptions) string {
 		parts = append(parts, r.Placetype)
 	}
 
-	if opts.Placetype != "" {
+	if opts.Placetype != "" && opts.Placetype != r.Placetype {
 		parts = append(parts, opts.Placetype)
 	}
 

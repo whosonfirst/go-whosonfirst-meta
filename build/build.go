@@ -122,9 +122,9 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
-		f_opts := repo.DefaultFilenameOptions()
-
-		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f), f_opts)
+		f_repo := whosonfirst.Repo(f)
+		
+		r, err := repo.NewDataRepoFromString(f_repo)
 
 		if err != nil {
 			return err
@@ -145,14 +145,12 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 
 			sort.Strings(fieldnames)
 
-			// HOW DOES THIS SQUARE WITH target ABOVE?
-			// (20180531/thisisaaronland)
-
 			repo_opts := repo.DefaultFilenameOptions()
 			repo_opts.Placetype = placetype
 
 			fname := r.MetaFilename(repo_opts)
-
+			// log.Println("FNAME", fname)
+			
 			root := opts.Workdir
 
 			// this is just for backwards compatibility
