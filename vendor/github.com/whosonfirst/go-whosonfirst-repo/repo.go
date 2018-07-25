@@ -11,6 +11,12 @@ import (
 )
 
 type Repo interface {
+	String() string
+	Name() string
+	ConcordancesFilename(*FilenameOptions) string
+	MetaFilename(*FilenameOptions) string
+	SQLiteFilename(*FilenameOptions) string
+	BundleFilename(*FilenameOptions) string
 }
 
 type DataRepo struct {
@@ -132,6 +138,10 @@ func NewDataRepoFromString(repo string) (*DataRepo, error) {
 }
 
 func (r *DataRepo) String() string {
+	return r.Name()
+}
+
+func (r *DataRepo) Name() string {
 
 	parts := make([]string, 0)
 
