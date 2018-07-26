@@ -34,7 +34,7 @@ func DefaultBuildOptions() (*BuildOptions, error) {
 		Workdir:        workdir,
 		MaxFilehandles: 1024,
 		Logger:         logger,
-		OldSkool:	false,		// as in old-skool "wof-PLACETYPE-latest" filenames (see go-whosonfirst-repo)
+		OldSkool:       false, // as in old-skool "wof-PLACETYPE-latest" filenames (see go-whosonfirst-repo)
 	}
 
 	return &opts, nil
