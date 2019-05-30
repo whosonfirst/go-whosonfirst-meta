@@ -124,7 +124,8 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 
 		f_opts := repo.DefaultFilenameOptions()
 
-		r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f), f_opts)
+		// r, err := repo.NewDataRepoFromString(whosonfirst.Repo(f), f_opts)
+		r, err := repo.NewCustomRepoFromString(whosonfirst.Repo(f), f_opts)
 
 		if err != nil {
 			return err
