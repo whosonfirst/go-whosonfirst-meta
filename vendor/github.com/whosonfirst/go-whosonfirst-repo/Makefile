@@ -16,6 +16,7 @@ rmdeps:
 build:	fmt bin
 
 deps:   rmdeps
+	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-cli"
 	@GOPATH=$(GOPATH) go get -u "github.com/whosonfirst/go-whosonfirst-placetypes"
 
 vendor-deps: rmdeps deps
@@ -27,6 +28,7 @@ vendor-deps: rmdeps deps
 
 bin: 	self
 	@GOPATH=$(GOPATH) go build -o bin/wof-repo-parse cmd/wof-repo-parse.go
+	# @GOPATH=$(GOPATH) go build -o bin/test cmd/test.go
 
 fmt:
 	go fmt *.go
