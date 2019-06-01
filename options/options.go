@@ -7,6 +7,7 @@ import (
 
 type BuildOptions struct {
 	Timings        bool
+	Strict         bool
 	Placetypes     []string
 	Roles          []string
 	Exclude        []string
@@ -29,6 +30,7 @@ func DefaultBuildOptions() (*BuildOptions, error) {
 		Timings:        false,
 		Placetypes:     []string{},
 		Roles:          []string{},
+		Strict:         false,
 		Exclude:        []string{},
 		Workdir:        workdir,
 		MaxFilehandles: 1024,

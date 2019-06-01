@@ -63,7 +63,7 @@ bin: 	self
 fmt:
 	go fmt *.go
 	go fmt build/*.go
-	go fmt cmd/*.go
+	# go fmt cmd/*/*.go
 	go fmt meta/*.go
 	go fmt options/*.go
 	go fmt stats/*.go
