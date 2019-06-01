@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -162,8 +163,12 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 				if opts.CombinedName == "" {
 					return errors.New("Missing opts.CombinedName")
 				}
-				
-				fname = opts.CombinedName
+
+				if strings.HasSuffix(opts.CombinedName, ".csv"){
+					fname = opts.CombinedName
+				} else {
+					fname = fmt.Sprintf("%s.csv". opts.CombinedName)
+				}
 				
 			} else {
 				
