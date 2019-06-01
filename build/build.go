@@ -167,7 +167,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 				if strings.HasSuffix(opts.CombinedName, ".csv"){
 					fname = opts.CombinedName
 				} else {
-					fname = fmt.Sprintf("%s.csv". opts.CombinedName)
+					fname = fmt.Sprintf("%s.csv", opts.CombinedName)
 				}
 				
 			} else {
