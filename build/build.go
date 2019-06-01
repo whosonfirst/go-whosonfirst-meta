@@ -79,6 +79,10 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
+		// TBD
+		// PLEASE MAKE THIS SUPPORT ALT FILES, YEAH
+		// (20190601/thisisaaronland)
+		
 		ok, err := utils.IsPrincipalWOFRecord(fh, ctx)
 
 		if err != nil {
