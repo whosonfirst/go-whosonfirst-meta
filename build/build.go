@@ -2,6 +2,7 @@ package build
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-csv"
@@ -154,14 +155,23 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 
 			sort.Strings(fieldnames)
 
-			// HOW DOES THIS SQUARE WITH target ABOVE?
-			// (20180531/thisisaaronland)
+			var fname string
+			
+			if opts.Combined {
 
-			repo_opts := repo.DefaultFilenameOptions()
-			repo_opts.Placetype = placetype
-
-			fname := r.MetaFilename(repo_opts)
-
+				if opts.CombinedName == "" {
+					return errors.New("Missing opts.CombinedName")
+				}
+				
+				fname = opts.CombinedName
+				
+			} else {
+				
+				repo_opts := repo.DefaultFilenameOptions()
+				repo_opts.Placetype = placetype
+				fname = r.MetaFilename(repo_opts)
+			}
+			
 			root := opts.Workdir
 
 			// this is just for backwards compatibility

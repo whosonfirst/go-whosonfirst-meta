@@ -13,6 +13,8 @@ type BuildOptions struct {
 	Exclude        []string
 	Workdir        string
 	MaxFilehandles int
+	Combined	bool
+	CombinedName	string
 	Logger         *log.WOFLogger
 }
 
@@ -34,6 +36,8 @@ func DefaultBuildOptions() (*BuildOptions, error) {
 		Exclude:        []string{},
 		Workdir:        workdir,
 		MaxFilehandles: 1024,
+		Combined:	false,
+		CombinedName:	"",
 		Logger:         logger,
 	}
 
