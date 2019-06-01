@@ -9,7 +9,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
-	"github.com/whosonfirst/go-whosonfirst-index/utils"
 	"github.com/whosonfirst/go-whosonfirst-meta"
 	"github.com/whosonfirst/go-whosonfirst-meta/options"
 	"github.com/whosonfirst/go-whosonfirst-placetypes/filter"
@@ -81,21 +80,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
-		// TBD
-		// PLEASE MAKE THIS SUPPORT ALT FILES, YEAH
-		// (20190601/thisisaaronland)
-		
-		ok, err := utils.IsPrincipalWOFRecord(fh, ctx)
-
-		if err != nil {
-			return err
-		}
-
-		if !ok {
-			return nil
-		}
-
-		f, err := feature.LoadFeatureFromReader(fh)
+		f, err := feature.LoadGeoJSONFeatureFromReader(fh)
 
 		if err != nil && !warning.IsWarning(err) {
 			return err
@@ -157,26 +142,26 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			sort.Strings(fieldnames)
 
 			var fname string
-			
+
 			if opts.Combined {
 
 				if opts.CombinedName == "" {
 					return errors.New("Missing opts.CombinedName")
 				}
 
-				if strings.HasSuffix(opts.CombinedName, ".csv"){
+				if strings.HasSuffix(opts.CombinedName, ".csv") {
 					fname = opts.CombinedName
 				} else {
 					fname = fmt.Sprintf("%s.csv", opts.CombinedName)
 				}
-				
+
 			} else {
-				
+
 				repo_opts := repo.DefaultFilenameOptions()
 				repo_opts.Placetype = placetype
 				fname = r.MetaFilename(repo_opts)
 			}
-			
+
 			root := opts.Workdir
 
 			// this is just for backwards compatibility

@@ -97,15 +97,25 @@ func GetDefaults() (*WOFMetaDefaults, error) {
 
 func FeatureToRow(feature []byte) (map[string]string, error) {
 
-	row := make(map[string]string)
+	var dump map[string]string
+	var err error
 
-	dump, err := DumpFeature(feature)
+	// TBD
+	// what... (20190601/thisisaaronland)
 
-	if err != nil {
-		return row, err
+	is_alt := false
+
+	if is_alt {
+		dump, err = DumpAltFeature(feature)
+	} else {
+		dump, err = DumpFeature(feature)
 	}
 
-	row = defaults.EnsureDefaults(dump)
+	if err != nil {
+		return nil, err
+	}
+
+	row := defaults.EnsureDefaults(dump)
 
 	return row, nil
 }
@@ -202,6 +212,15 @@ func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 	}
 
 	return nil
+}
+
+func DumpAltFeature(feature []byte) (map[string]string, error) {
+
+	// TBD
+	// make this work... (20190601/thisisaaronland)
+
+	row := make(map[string]string)
+	return row, nil
 }
 
 func DumpFeature(feature []byte) (map[string]string, error) {
