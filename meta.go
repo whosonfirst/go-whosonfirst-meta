@@ -220,6 +220,31 @@ func DumpAltFeature(feature []byte) (map[string]string, error) {
 	// make this work... (20190601/thisisaaronland)
 
 	row := make(map[string]string)
+
+	wofid_fl := gjson.GetBytes(feature, "properties.wof:id").Float()
+	wofid := int64(wofid_fl)
+
+	row["id"] = strconv.FormatInt(wofid, 10)
+	row["is_alt"] = "1"
+
+	alt_source := gjson.GetBytes(feature, "properties.src:geom").String()
+	alt_func := gjson.GetBytes(feature, "properties.src:function").String()
+	alt_extras := make([]string, 0)
+
+	row["source"] = alt_source
+	row["function"] = alt_func
+	row["extras"] = strings.Join(alt_extras, "-")
+
+	uri_args := uri.NewAlternateURIArgs(alt_source, alt_func, alt_extras...)
+
+	rel_path, err := uri.Id2RelPath(wofid, uri_args)
+
+	if err != nil {
+		return row, err
+	}
+
+	row["path"] = rel_path
+
 	return row, nil
 }
 
