@@ -16,6 +16,7 @@ type BuildOptions struct {
 	Combined       bool
 	CombinedName   string
 	Logger         *log.WOFLogger
+	OldSkool       bool
 }
 
 func DefaultBuildOptions() (*BuildOptions, error) {
@@ -39,6 +40,7 @@ func DefaultBuildOptions() (*BuildOptions, error) {
 		Combined:       false,
 		CombinedName:   "",
 		Logger:         logger,
+		OldSkool:       false, // as in old-skool "wof-PLACETYPE-latest" filenames (see go-whosonfirst-repo)
 	}
 
 	return &opts, nil
