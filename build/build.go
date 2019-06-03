@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-csv"
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
@@ -80,7 +81,13 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
-		f, err := feature.LoadGeoJSONFeatureFromReader(fh)
+		var f geojson.Feature
+
+		if opts.Strict {
+			f, err = feature.LoadFeatureFromReader(fh)
+		} else {
+			f, err = feature.LoadGeoJSONFeatureFromReader(fh)
+		}
 
 		if err != nil && !warning.IsWarning(err) {
 			return err
