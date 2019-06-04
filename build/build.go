@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/facebookgo/atomicfile"
 	"github.com/whosonfirst/go-whosonfirst-csv"
-	"github.com/whosonfirst/go-whosonfirst-geojson-v2"	
+	"github.com/whosonfirst/go-whosonfirst-geojson-v2"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
