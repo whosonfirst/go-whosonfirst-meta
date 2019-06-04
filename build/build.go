@@ -10,7 +10,6 @@ import (
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/feature"
 	"github.com/whosonfirst/go-whosonfirst-geojson-v2/properties/whosonfirst"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
-	"github.com/whosonfirst/go-whosonfirst-index/utils"
 	"github.com/whosonfirst/go-whosonfirst-meta"
 	"github.com/whosonfirst/go-whosonfirst-meta/options"
 	"github.com/whosonfirst/go-whosonfirst-placetypes/filter"
@@ -82,20 +81,6 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 			return err
 		}
 
-		// TBD
-		// PLEASE MAKE THIS SUPPORT ALT FILES, YEAH
-		// (20190601/thisisaaronland)
-
-		ok, err := utils.IsPrincipalWOFRecord(fh, ctx)
-
-		if err != nil {
-			return err
-		}
-
-		if !ok {
-			return nil
-		}
-
 		var f geojson.Feature
 
 		if opts.Strict {
@@ -106,6 +91,13 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 
 		if err != nil && !warning.IsWarning(err) {
 			return err
+		}
+
+		is_alt := whosonfirst.IsAlt(f)
+
+		if is_alt {
+			log.Println(fmt.Sprintf("Alternate geometries are not supported yet, skipping %s (%s)", f.Id(), path))
+			return nil
 		}
 
 		atomic.AddInt32(&open, 1)
@@ -132,6 +124,7 @@ func BuildFromIndex(opts *options.BuildOptions, mode string, indices []string) (
 		row, err := meta.FeatureToRow(f.Bytes())
 
 		if err != nil {
+			log.Println(fmt.Sprintf("Unable to convert feature to row (%s) %s", placetype, err))
 			return err
 		}
 
