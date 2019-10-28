@@ -2,8 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/whosonfirst/go-whosonfirst-meta/build"
 	"github.com/whosonfirst/go-whosonfirst-meta/options"
+	wof_index "github.com/whosonfirst/go-whosonfirst-index"
+	_ "github.com/whosonfirst/go-whosonfirst-index/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,7 +15,10 @@ import (
 
 func main() {
 
-	mode := flag.String("mode", "repo", "Where to read data (to create metafiles) from. If empty then the code will assume the current working directory.")
+	valid_modes := strings.Join(wof_index.Modes(), ",")
+	desc_modes := fmt.Sprintf("The mode to use importing data. Valid modes are: %s.", valid_modes)
+	
+	mode := flag.String("mode", "repo", desc_modes)
 	out := flag.String("out", "", "Where to store metafiles. If empty then assume metafile are created in the current working directory.")
 
 	// blah blah blah interface definition mismatch atomicfile blah blah blah...
