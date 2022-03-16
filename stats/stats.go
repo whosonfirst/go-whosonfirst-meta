@@ -2,7 +2,7 @@ package stats
 
 import (
 	"errors"
-	"github.com/whosonfirst/go-whosonfirst-csv"
+	"github.com/sfomuseum/go-csvdict"
 	"io"
 	"strconv"
 	"sync"
@@ -78,7 +78,7 @@ func newStats(path string) *Stats {
 
 func Compile(path string) (*Stats, error) {
 
-	reader, err := csv.NewDictReaderFromPath(path)
+	reader, err := csvdict.NewReaderFromPath(path)
 
 	if err != nil {
 		return nil, err

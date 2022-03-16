@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/whosonfirst/go-whosonfirst-meta/build"
-	"github.com/whosonfirst/go-whosonfirst-meta/options"
 	wof_index "github.com/whosonfirst/go-whosonfirst-index"
 	_ "github.com/whosonfirst/go-whosonfirst-index/fs"
+	"github.com/whosonfirst/go-whosonfirst-meta/build"
+	"github.com/whosonfirst/go-whosonfirst-meta/options"
 	"log"
 	"os"
 	"path/filepath"
@@ -17,7 +17,7 @@ func main() {
 
 	valid_modes := strings.Join(wof_index.Modes(), ",")
 	desc_modes := fmt.Sprintf("The mode to use importing data. Valid modes are: %s.", valid_modes)
-	
+
 	mode := flag.String("mode", "repo", desc_modes)
 	out := flag.String("out", "", "Where to store metafiles. If empty then assume metafile are created in the current working directory.")
 

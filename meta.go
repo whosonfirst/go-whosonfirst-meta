@@ -6,12 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/sfomuseum/go-csvdict"
 	"github.com/tidwall/gjson"
-	"github.com/whosonfirst/go-whosonfirst-csv"
 	"github.com/whosonfirst/go-whosonfirst-meta/meta"
 	"github.com/whosonfirst/go-whosonfirst-uri"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -128,7 +127,7 @@ func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 			return err
 		}
 
-		feature, err := ioutil.ReadAll(fh)
+		feature, err := io.ReadAll(fh)
 
 		if err != nil {
 			return err
@@ -140,9 +139,9 @@ func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 		lookup[wofid] = feature
 	}
 
-	var writer *csv.DictWriter
+	var writer *csvdict.Writer
 
-	reader, reader_err := csv.NewDictReader(source)
+	reader, reader_err := csvdict.NewReader(source)
 
 	if reader_err != nil {
 		return reader_err
@@ -189,7 +188,7 @@ func UpdateMetafile(source io.Reader, dest io.Writer, updated []string) error {
 
 			sort.Strings(fieldnames)
 
-			writer, err = csv.NewDictWriter(dest, fieldnames)
+			writer, err = csvdict.NewWriter(dest, fieldnames)
 
 			if err != nil {
 				return err

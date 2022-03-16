@@ -1,9 +1,10 @@
 module github.com/whosonfirst/go-whosonfirst-meta
 
-go 1.12
+go 1.16
 
 require (
 	github.com/facebookgo/atomicfile v0.0.0-20151019160806-2de1f203e7d5
+	github.com/sfomuseum/go-csvdict v1.0.0
 	github.com/tidwall/gjson v1.14.0
 	github.com/whosonfirst/go-whosonfirst-csv v0.1.0
 	github.com/whosonfirst/go-whosonfirst-geojson-v2 v0.16.4
